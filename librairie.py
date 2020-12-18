@@ -17,31 +17,38 @@ class Vaisseau() :
         self.__vitesse = pVitesse
         self.__position = pPosition
 
+    def set_position(self, pPosition):
+        self.__position = pPosition
+
     def get_position(self):
         return self.__position
 
     def get_vie(self):
         return self.__vie
 
-    def deplacement_droit(self):
-        self.__position[0] += 1
+    def deplacement_droite(self, canevas):
+        if self.__position[0] < 980 :
+            self.__position[0] += 10
 
-    def deplacement_gauche(self):
-        self.__position[0] -= 1
+    def deplacement_gauche(self, canevas):
+        if self.__position[0] > 10 :
+            self.__position[0] -= 10
 
     def deplacement_bas(self):
-        self.__position[1] += 1
+        if self.__position[1] < 690 :
+            self.__position[1] += 10
 
     def deplacement_haut(self):
-        self.__position[1] -= 1
+        if self.__position[1] > 10 :
+            self.__position[1] -= 10
 
 class Vaisseau_joueur(Vaisseau):
     def __init__(self,pName = "player"):
         self.__player = pName
 
 class Vaisseau_alien(Vaisseau):
-    def __init__(self,pName = "alien"):
-        self.__player = pName
+    def blabla(self):
+        return "je suis trop fort"
 
 
 
