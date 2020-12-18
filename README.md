@@ -23,6 +23,8 @@ recréer le jeu space invaders
         position
         vie
 
+-fonction qui créer la grille de jeu
+
 -fonction qui gère le deplacement du joueur (droite, gauche)
 
 -fonction qui gère le déplacement automatiques des vaisseaux aliens
