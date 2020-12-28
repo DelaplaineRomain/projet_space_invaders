@@ -27,18 +27,11 @@ class Vaisseau() :
         return self.__vie
 
     def deplacement_droite(self):
-        if self.__position[0] < 980 :
-            self.__position[0] += 20
-            return True
-        else :
-            return False
+        self.__position[0] += 20
+
 
     def deplacement_gauche(self):
-        if self.__position[0] > 20 :
-            self.__position[0] -= 20
-            return True
-        else : 
-            return False
+        self.__position[0] -= 20
 
     def deplacement_bas(self):
         if self.__position[1] < 690 :

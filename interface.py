@@ -61,32 +61,57 @@ class Interface_game ():
         """
         génère un vaisseau_alien
         """
+        global vaisseau_alien
+        global vaisseau_alien_gui      #modif
+        global dx
+        global dy
+        global position_x
+        global position_y
+        dx = 20
+        dy = 0
         vaisseau_alien = lib.Vaisseau_alien(2121,2121,[10,200])
         position_x = vaisseau_alien.get_position()[0]
         position_y = vaisseau_alien.get_position()[1]
         vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
-        self.deplacement_alien(vaisseau_alien,vaisseau_alien_gui)
+        self.deplacement_alien()    #modif
 
-    def deplacement_alien(self, vaisseau_alien, vaisseau_alien_gui):
+    def deplacement_alien(self):  #modif
         """
         déplacement automatique des aliens
         le vaisseau bouge toujours vers la droite
         S'il atteint le bord droit, il bougera alors vers la gauche
         """
-        print("fonction deplacement_alien")
-        self.canevas.move(vaisseau_alien_gui, 20, 0)
-        while vaisseau_alien.deplacement_droite() == True:
-            print("déplace vers la droite")
-            position_x = vaisseau_alien.get_position()[0]
-            position_y = vaisseau_alien.get_position()[1]
-            print(position_x)      
-            self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
+        # print("fonction deplacement_alien")
+        # self.canevas.move(vaisseau_alien_gui, 20, 0)
+        # while vaisseau_alien.deplacement_droite() == True:
+        #     print("déplace vers la droite")
+        #     position_x = vaisseau_alien.get_position()[0]
+        #     position_y = vaisseau_alien.get_position()[1]
+        #     print(position_x)      
+        #     self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
     
-        while vaisseau_alien.deplacement_gauche() == True:
-            print("déplace vers l gauche")
-            vaisseau_alien.deplacement_gauche()
-            position_x = vaisseau_alien.get_position()[0]
-            position_y = vaisseau_alien.get_position()[1]
-            print(position_x)    
-            self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
+        # while vaisseau_alien.deplacement_gauche() == True:
+        #     print("déplace vers l gauche")
+        #     vaisseau_alien.deplacement_gauche()
+        #     position_x = vaisseau_alien.get_position()[0]
+        #     position_y = vaisseau_alien.get_position()[1]
+        #     print(position_x)    
+        #     self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
+        global vaisseau_alien
+        global vaisseau_alien_gui
+        global dx
+        global dy
+        global position_x
+        global position_y
+        if position_x+10+dx > 700 :
+            dx = -dx
+            print ("gauche")
+        if position_x-10+dx < 0 :
+            dx = -dx
+            print("droit")
+        position_x = position_x + dx
+        position_y = position_y + dy
+        print("position_x : ",position_x)
+        self.canevas.coords(vaisseau_alien_gui,position_x-10,position_y-10,position_x+10,position_y+10)
+        self.mywindow.after(200,self.deplacement_alien)
     
