@@ -11,6 +11,7 @@ To do :
 #### les imports
 
 import tkinter
+from time import sleep
 
 import librairie as lib
 #### classe interface
@@ -47,7 +48,7 @@ class Interface_game ():
         """"section pour les boutons quiter et lancer"""
         self.frame3 = tkinter.Frame(self.mywindow , bg = 'grey')
         self.frame3.grid(row = 1 , column = 21 , rowspan = 16 , columnspan = 5 , padx = 10 , pady = 10)
-        self.bouton_lancer = tkinter.Button(self.frame3 , text = 'Start' , command = self.Vaisseau_alien())
+        self.bouton_lancer = tkinter.Button(self.frame3 , text = 'Start' , command = self.Vaisseau_alien)
         self.bouton_lancer.grid(row = 1 , column = 1, padx = 10 , pady = 10)
         self.bouton_quitter = tkinter.Button(self.frame3 , text = 'Exit')
         self.bouton_quitter.grid(row = 2 , column = 1, padx = 10 , pady = 10)
@@ -60,20 +61,32 @@ class Interface_game ():
         """
         génère un vaisseau_alien
         """
-        global vaisseau_alien
-        global vaisseau_alien_gui
-        vaisseau_alien = lib.Vaisseau_alien(2121,2121,[200,200])
+        vaisseau_alien = lib.Vaisseau_alien(2121,2121,[10,200])
         position_x = vaisseau_alien.get_position()[0]
         position_y = vaisseau_alien.get_position()[1]
-        vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y-10, fill='blue')
+        vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
+        self.deplacement_alien(vaisseau_alien,vaisseau_alien_gui)
 
-    def deplacement_alien(self):
+    def deplacement_alien(self, vaisseau_alien, vaisseau_alien_gui):
         """
         déplacement automatique des aliens
         le vaisseau bouge toujours vers la droite
         S'il atteint le bord droit, il bougera alors vers la gauche
         """
-        position_x = vaisseau_alien.get_position()[0]
-        position_y = vaisseau_alien.get_position()[1]
-        self.mywindow.after(50, self.deplacement_alien())        
-        self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10)
+        print("fonction deplacement_alien")
+        self.canevas.move(vaisseau_alien_gui, 20, 0)
+        while vaisseau_alien.deplacement_droite() == True:
+            print("déplace vers la droite")
+            position_x = vaisseau_alien.get_position()[0]
+            position_y = vaisseau_alien.get_position()[1]
+            print(position_x)      
+            self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
+    
+        while vaisseau_alien.deplacement_gauche() == True:
+            print("déplace vers l gauche")
+            vaisseau_alien.deplacement_gauche()
+            position_x = vaisseau_alien.get_position()[0]
+            position_y = vaisseau_alien.get_position()[1]
+            print(position_x)    
+            self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
+    
