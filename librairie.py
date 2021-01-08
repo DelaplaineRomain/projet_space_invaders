@@ -73,6 +73,11 @@ class shoot():
         if self.__position_ball[1] >= 10 :
             self.__position_ball[1] -= 10
 
-
+class brique():
+    def __init__(self,pPosition):
+        self.__position = pPosition
+    
+    def get_position(self):
+        return self.__position[:]
 
 

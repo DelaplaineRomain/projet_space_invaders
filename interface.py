@@ -12,6 +12,7 @@ To do :
 
 import tkinter
 import librairie as lib
+from random import randint 
 
 #### classe interface
 
@@ -65,6 +66,7 @@ class Interface_game ():
         liste_shoot = []
         self.vaisseau_joueur()
         self.Vaisseau_alien()
+        self.create_wall()
 
     def Vaisseau_alien(self):
         """
@@ -203,3 +205,23 @@ class Interface_game ():
         if touche == 'space' :
             self.tir_joueur()
 
+    def create_wall(self):
+        """
+        Fonction qui créé un mur de brique (3 briques de hauteurs et 5 de largeurs)
+        """
+        global coord_all_wall
+        
+        coord_all_wall = []
+        #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
+        position_mur = [randint(0,330), randint(380,590), randint(660,900)]
+        
+        for pos in position_mur:
+            for ligne in range(5): 
+                lst_ligne_brique = []
+                for colonne in range(3):
+                    brique = lib.brique([pos+25*ligne,475+25*colonne])
+                    position_x = brique.get_position()[0]
+                    position_y = brique.get_position()[1]
+                    brique_GUI = self.canevas.create_rectangle(position_x , position_y , position_x+25 , position_y+25 , fill = 'red')
+                    lst_ligne_brique.append([brique,brique_GUI])
+                coord_all_wall.append(lst_ligne_brique)
