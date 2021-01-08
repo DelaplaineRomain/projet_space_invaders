@@ -11,7 +11,6 @@ To do :
 #### les imports
 
 import tkinter
-from time import sleep
 
 import librairie as lib
 #### classe interface
