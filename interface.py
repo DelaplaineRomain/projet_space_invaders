@@ -11,8 +11,8 @@ To do :
 #### les imports
 
 import tkinter
-
 import librairie as lib
+
 #### classe interface
 
 class Interface_game ():
@@ -39,15 +39,19 @@ class Interface_game ():
         """section pour le canvas"""
         self.frame2 = tkinter.Frame(self.mywindow , bg = 'grey')
         self.frame2.grid(row = 2 , column = 1 , rowspan = 15 , columnspan = 20 , padx = 10 , pady = 10)
-        self.Largeur = 700
+        self.Largeur = 1000
         self.Hauteur = 700
         self.canevas = tkinter.Canvas(self.frame2, width = self.Largeur , height = self.Hauteur, bg = 'black' )
+        self.canevas.focus_set()
+        self.canevas.bind('<Key>',self.gestion_keyEvent)
+        # self.canevas.bind('<Key>',self.deplacement_joueur)
+        # self.canevas.bind('<KeyPress-space>',self.tir_joueur)
         self.canevas.grid(padx = 10 , pady = 10)
 
         """"section pour les boutons quiter et lancer"""
         self.frame3 = tkinter.Frame(self.mywindow , bg = 'grey')
         self.frame3.grid(row = 1 , column = 21 , rowspan = 16 , columnspan = 5 , padx = 10 , pady = 10)
-        self.bouton_lancer = tkinter.Button(self.frame3 , text = 'Start' , command = self.Vaisseau_alien)
+        self.bouton_lancer = tkinter.Button(self.frame3 , text = 'Start' , command = self.game_start)
         self.bouton_lancer.grid(row = 1 , column = 1, padx = 10 , pady = 10)
         self.bouton_quitter = tkinter.Button(self.frame3 , text = 'Exit')
         self.bouton_quitter.grid(row = 2 , column = 1, padx = 10 , pady = 10)
@@ -55,6 +59,12 @@ class Interface_game ():
         """lancement de la fenetre"""
 
         self.mywindow.mainloop()
+
+    def game_start(self):
+        global liste_shoot
+        liste_shoot = []
+        self.vaisseau_joueur()
+        self.Vaisseau_alien()
 
     def Vaisseau_alien(self):
         """
@@ -74,7 +84,7 @@ class Interface_game ():
         for ligne in range(3):
             coord_ligne_alien = [] #Liste vide qui sera remplie par les vaisseaux d'une même ligne
             for colonne in range(5):
-                vaisseau_alien = lib.Vaisseau_alien(1,1,[20+100*colonne,20+100*ligne])
+                vaisseau_alien = lib.Vaisseau(1,20,1,[20+100*colonne,20+100*ligne])
                 position_x = vaisseau_alien.get_position()[0]
                 position_y = vaisseau_alien.get_position()[1]
                 vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
@@ -82,7 +92,7 @@ class Interface_game ():
             coord_all_alien.append(coord_ligne_alien)
         self.deplacement_alien()    
 
-    def deplacement_alien(self):  
+    def deplacement_alien(self):
         """
         déplacement automatique les aliens
         le vaisseau bouge toujours en premier vers la droite
@@ -94,22 +104,19 @@ class Interface_game ():
         global dx
         global dy
         global coord_all_alien
-        
-        if coord_all_alien[-1][-1][0].get_position()[0]+10+dx > 700 : #On prend l'alien le plus en bas à droite de l'écran
+        if coord_all_alien[-1][-1][0].get_position()[0]+10+dx > 1000 : #On prend l'alien le plus en bas à droite de l'écran
             dx = -dx
-            print ("gauche")
         if coord_all_alien[-1][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en bas à gauche de l'écran
             dx = -dx
         
             for ligne in coord_all_alien:
                 for vaisseau in ligne:
-                   vaisseau[0].get_position()[1] += dy
-            print("droite")
+                   vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
         for ligne in coord_all_alien:
-                for vaisseau in ligne:   
-                    vaisseau[0].get_position()[0] += dx
+                for vaisseau in ligne:
+                    vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
                     self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
-        if coord_all_alien[-1][0][0].get_position()[1] < 500 : 
+        if coord_all_alien[-1][0][0].get_position()[1] < 640 : 
             self.mywindow.after(200,self.deplacement_alien)
         else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
@@ -122,4 +129,77 @@ class Interface_game ():
         print("game over")
         return
 
+    def vaisseau_joueur(self):
+        global mon_vaisseau
+        global mon_vaisseau_gui
+        mon_vaisseau = lib.Vaisseau(0,20,3,[100,640])
+        position_x = mon_vaisseau.get_position()[0]
+        position_y = mon_vaisseau.get_position()[1]
+        mon_vaisseau_gui = self.canevas.create_rectangle(position_x , position_y , position_x+20 , position_y+20 , fill = 'white')
+    
+    def deplacement_joueur(self,pTouche):
+        global mon_vaisseau
+        global mon_vaisseau_gui
+        touche = pTouche
+        # touche = event.keysym
+        if touche == 'q' or touche == 'Left':
+            mon_vaisseau.deplacement_gauche()
+        if touche == 'd' or touche == 'Right':
+            mon_vaisseau.deplacement_droite()
+        position_x = mon_vaisseau.get_position()[0]
+        position_y = mon_vaisseau.get_position()[1]
+        self.canevas.coords(mon_vaisseau_gui , position_x , position_y , position_x+20 , position_y+20)
+
+    def create_ball(self, pPosition , pAuteur):
+        global ball
+        global ball_gui
+        global liste_shoot
+        ball = lib.shoot(pPosition , pAuteur)
+        position_x_ball = ball.get_position()[0]
+        position_y_ball = ball.get_position()[1]
+        ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'red')
+        liste_shoot.append([ball,ball_gui])
+        # self.deplacement_ball()
+        self.deplacement_shoot()
+
+    def deplacement_shoot(self):
+        global liste_shoot
+        for val in liste_shoot:
+            projectile = val[0]
+            projectile_gui = val[1]
+            if projectile.get_auteur() == 0 :
+                projectile.deplacement_haut_shoot()
+                position_x = projectile.get_position()[0]
+                position_y = projectile.get_position()[1]
+            elif projectile.get_auteur() == 1 :
+                projectile.deplacement_bas_shoot()
+                position_x = projectile.get_position()[0]
+                position_y = projectile.get_position()[1]
+            self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
+            if position_y == 0 :
+                self.canevas.delete(projectile_gui)
+        self.mywindow.after(500,self.deplacement_shoot)
+
+    def deplacement_ball(self):
+        global ball
+        global ball_gui
+        ball.deplacement_haut_shoot()
+        position_x_ball = ball.get_position()[0]
+        position_y_ball = ball.get_position()[1]
+        self.canevas.coords(ball_gui , position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10)
+        self.mywindow.after(500,self.deplacement_ball)
+
+    def tir_joueur(self):
+        global mon_vaisseau
+        position_initial = mon_vaisseau.get_position()
+        type_initial = mon_vaisseau.get_type()
+        self.create_ball(position_initial,type_initial)
         
+    def gestion_keyEvent(self,event):
+        touche = event.keysym
+        liste = ['q','d','Right','Left']
+        if touche in liste :
+            self.deplacement_joueur(touche)
+        if touche == 'space' :
+            self.tir_joueur()
+

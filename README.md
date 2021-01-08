@@ -17,11 +17,14 @@ recréer le jeu space invaders
             attribut d'alien
             -sous classe type d'alien
                 type d'alien
-                vie
             
     -classe ilot
         position
         vie
+
+    -classe balle
+        position initial
+        auteur
 
 -fonction qui créer la grille de jeu
 
