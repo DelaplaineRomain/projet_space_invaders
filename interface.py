@@ -67,23 +67,25 @@ class Interface_game ():
         global dy
         global position_x
         global position_y
-        global coord_ligne_alien
+        global coord_all_alien
         dx = 40
         dy = 40
-        coord_ligne_alien = []
-        #On créé 5 vaisseaux à la suite
-        for i in range(5):
-            vaisseau_alien = lib.Vaisseau_alien(1,1,[20+100*i,100])
-            position_x = vaisseau_alien.get_position()[0]
-            position_y = vaisseau_alien.get_position()[1]
-            vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
-            coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
-        print(coord_ligne_alien)
+        coord_all_alien = [] #coordonné de toutes les lignes des aliens : [[ligne 1],[ligne 2],[ligne 3]]
+        #On créé 5 vaisseaux à la suite sur une même ligne 3 fois
+        for ligne in range(3):
+            coord_ligne_alien = [] #Liste vide qui sera remplie par les vaisseaux d'une même ligne
+            for colonne in range(5):
+                vaisseau_alien = lib.Vaisseau_alien(1,1,[20+100*colonne,20+100*ligne])
+                position_x = vaisseau_alien.get_position()[0]
+                position_y = vaisseau_alien.get_position()[1]
+                vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
+                coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
+            coord_all_alien.append(coord_ligne_alien)
         self.deplacement_alien()    
 
     def deplacement_alien(self):  
         """
-        déplacement automatique des aliens
+        déplacement automatique les aliens
         le vaisseau bouge toujours en premier vers la droite
         S'il atteint le bord droit, il bougera alors vers la gauche
         S'il atteint le bord gauche, il descend d'un cran vers le bas
@@ -92,26 +94,25 @@ class Interface_game ():
         global vaisseau_alien_gui
         global dx
         global dy
-        global coord_ligne_alien
-        print(coord_ligne_alien[-1][0])
+        global coord_all_alien
         
-        if coord_ligne_alien[-1][0].get_position()[0]+10+dx > 700 : #L'alien est sur la droite de l'écran
+        if coord_all_alien[-1][-1][0].get_position()[0]+10+dx > 700 : #On prend l'alien le plus en bas à droite de l'écran
             dx = -dx
             print ("gauche")
-        if coord_ligne_alien[0][0].get_position()[0]-10+dx < 0 : #l'alien est sur la gauche de l'écran
+        if coord_all_alien[-1][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en bas à gauche de l'écran
             dx = -dx
-            for vaisseau in coord_ligne_alien:
-                vaisseau[0].get_position()[1] += dy
-                #position_y = position_y + dy
-            print("droit")
-        for vaisseau in coord_ligne_alien:    
-            vaisseau[0].get_position()[0] += dx
-        #position_x = position_x + dx
-        #print("position_x : ",position_x)
-            self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
-        if coord_ligne_alien[0][0].get_position()[1] < 500 : #Si l'alien est sur la même ligne que le vaisseau
+        
+            for ligne in coord_all_alien:
+                for vaisseau in ligne:
+                   vaisseau[0].get_position()[1] += dy
+            print("droite")
+        for ligne in coord_all_alien:
+                for vaisseau in ligne:   
+                    vaisseau[0].get_position()[0] += dx
+                    self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
+        if coord_all_alien[-1][0][0].get_position()[1] < 500 : 
             self.mywindow.after(200,self.deplacement_alien)
-        else : 
+        else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
         
     def fin_partie(self):
