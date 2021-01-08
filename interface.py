@@ -59,59 +59,67 @@ class Interface_game ():
 
     def Vaisseau_alien(self):
         """
-        génère un vaisseau_alien
+        génère une ligne de 5 vaisseau_alien
         """
         global vaisseau_alien
-        global vaisseau_alien_gui      #modif
+        global vaisseau_alien_gui      
         global dx
         global dy
         global position_x
         global position_y
-        dx = 20
-        dy = 0
-        vaisseau_alien = lib.Vaisseau_alien(2121,2121,[10,200])
-        position_x = vaisseau_alien.get_position()[0]
-        position_y = vaisseau_alien.get_position()[1]
-        vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
-        self.deplacement_alien()    #modif
+        global coord_ligne_alien
+        dx = 40
+        dy = 40
+        coord_ligne_alien = []
+        #On créé 5 vaisseaux à la suite
+        for i in range(5):
+            vaisseau_alien = lib.Vaisseau_alien(1,1,[20+100*i,100])
+            position_x = vaisseau_alien.get_position()[0]
+            position_y = vaisseau_alien.get_position()[1]
+            vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
+            coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
+        print(coord_ligne_alien)
+        self.deplacement_alien()    
 
-    def deplacement_alien(self):  #modif
+    def deplacement_alien(self):  
         """
         déplacement automatique des aliens
-        le vaisseau bouge toujours vers la droite
+        le vaisseau bouge toujours en premier vers la droite
         S'il atteint le bord droit, il bougera alors vers la gauche
+        S'il atteint le bord gauche, il descend d'un cran vers le bas
         """
-        # print("fonction deplacement_alien")
-        # self.canevas.move(vaisseau_alien_gui, 20, 0)
-        # while vaisseau_alien.deplacement_droite() == True:
-        #     print("déplace vers la droite")
-        #     position_x = vaisseau_alien.get_position()[0]
-        #     position_y = vaisseau_alien.get_position()[1]
-        #     print(position_x)      
-        #     self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
-    
-        # while vaisseau_alien.deplacement_gauche() == True:
-        #     print("déplace vers l gauche")
-        #     vaisseau_alien.deplacement_gauche()
-        #     position_x = vaisseau_alien.get_position()[0]
-        #     position_y = vaisseau_alien.get_position()[1]
-        #     print(position_x)    
-        #     self.canevas.coords(vaisseau_alien_gui, position_x-10, position_y-10, position_x+10, position_y+10)
         global vaisseau_alien
         global vaisseau_alien_gui
         global dx
         global dy
-        global position_x
-        global position_y
-        if position_x+10+dx > 700 :
+        global coord_ligne_alien
+        print(coord_ligne_alien[-1][0])
+        
+        if coord_ligne_alien[-1][0].get_position()[0]+10+dx > 700 : #L'alien est sur la droite de l'écran
             dx = -dx
             print ("gauche")
-        if position_x-10+dx < 0 :
+        if coord_ligne_alien[0][0].get_position()[0]-10+dx < 0 : #l'alien est sur la gauche de l'écran
             dx = -dx
+            for vaisseau in coord_ligne_alien:
+                vaisseau[0].get_position()[1] += dy
+                #position_y = position_y + dy
             print("droit")
-        position_x = position_x + dx
-        position_y = position_y + dy
-        print("position_x : ",position_x)
-        self.canevas.coords(vaisseau_alien_gui,position_x-10,position_y-10,position_x+10,position_y+10)
-        self.mywindow.after(200,self.deplacement_alien)
-    
+        for vaisseau in coord_ligne_alien:    
+            vaisseau[0].get_position()[0] += dx
+        #position_x = position_x + dx
+        #print("position_x : ",position_x)
+            self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
+        if coord_ligne_alien[0][0].get_position()[1] < 500 : #Si l'alien est sur la même ligne que le vaisseau
+            self.mywindow.after(200,self.deplacement_alien)
+        else : 
+            self.fin_partie()
+        
+    def fin_partie(self):
+        """
+        Affiche un message de game over
+        Pour l'instant sur la console
+        """
+        print("game over")
+        return
+
+        
