@@ -66,12 +66,11 @@ class Interface_game ():
         global liste_shoot
         liste_shoot = []
         self.vaisseau_joueur()
+        self.create_wall()
         self.Vaisseau_alien()
         self.tir_alien()
         self.deplacement_shoot()
         self.colision()
-        self.create_wall()
-
 
     def Vaisseau_alien(self):
         """
@@ -241,14 +240,25 @@ class Interface_game ():
         global liste_shoot
         global mon_vaisseau
         global mon_vaisseau_gui
+        global coord_all_wall
         liste_tempo = liste_shoot
-        for i,val in enumerate (liste_shoot):
-            shoot = val[0]
-            shoot_gui = val[1]
+        for i,val1 in enumerate (liste_shoot):                #val1 représente la liste [shoot,shoot_gui]
+            shoot = val1[0]
+            shoot_gui = val1[1]
             auteur = shoot.get_auteur()
             if auteur == 1 :
-                validite = self.colision_check(shoot,mon_vaisseau)
-                if validite :
+                for mur in coord_all_wall :
+                    for colonne in mur :
+                        for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
+                            fragment = val2[0]
+                            fragment_gui = val2[1]
+                            validite_wall = self.colision_check(shoot,fragment)
+                            if validite_wall :
+                                self.canevas.delete(shoot_gui,fragment_gui)
+                                liste_shoot.remove(val1)
+                                colonne.remove(val2)
+                validite_joueur = self.colision_check(shoot,mon_vaisseau)
+                if validite_joueur :
                     if mon_vaisseau.get_vie() > 1 :
                         self.canevas.delete(shoot_gui)
                     elif mon_vaisseau.get_vie() == 1 :
@@ -256,7 +266,8 @@ class Interface_game ():
                     new_vie = mon_vaisseau.get_vie() - 1
                     mon_vaisseau.set_vie(new_vie)
                     self.vie.set(str(mon_vaisseau.get_vie()))
-                    liste_shoot.remove(val)
+                    liste_shoot.remove(val1)
+
             elif auteur == 0 :
                 for ligne in coord_all_alien :
                     for vaisseau in ligne :
@@ -265,16 +276,25 @@ class Interface_game ():
                         validite = self.colision_check(shoot,vaisseau_enemi)
                         if validite :
                             self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
-                            liste_shoot.remove(val)
+                            liste_shoot.remove(val1)
                             # ligne.remove(vaisseau)
-                for val2 in liste_tempo[:i]+liste_tempo[i+1:]:
-                    shoot2 = val2[0]
-                    shoot2_gui = val2[1]
+                for val3 in liste_tempo[:i]+liste_tempo[i+1:]:
+                    shoot2 = val3[0]
+                    shoot2_gui = val3[1]
                     validite = self.colision_check(shoot,shoot2)
                     if validite :
                         self.canevas.delete(shoot2_gui,shoot_gui)
-                        liste_shoot.remove(val)
-                        liste_shoot.remove(val2)
+                        liste_shoot.remove(val1)
+                        liste_shoot.remove(val3)
+                for mur in coord_all_wall :
+                    for colonne in mur :
+                        for val4 in colonne :     #val4 représente la liste [brique,brique_gui]
+                            fragment = val4[0]
+                            fragment_gui = val4[1]
+                            validite_wall = self.colision_check(shoot,fragment)
+                            if validite_wall :
+                                self.canevas.delete(shoot_gui)
+                                liste_shoot.remove(val1)          
         self.mywindow.after(100,self.colision)
 
     def create_wall(self):
@@ -288,13 +308,16 @@ class Interface_game ():
         position_mur = [random.randint(0,330), random.randint(380,590), random.randint(660,900)]
         
         for pos in position_mur:
-            for ligne in range(5): 
-                lst_ligne_brique = []
-                for colonne in range(3):
-                    brique = lib.brique([pos+25*ligne,475+25*colonne])
+            mur = []
+            for colonne in range(5): 
+                lst_colonne_brique = []
+                for ligne in range(3):
+                    brique = lib.brique([pos+25*colonne,475+25*ligne])
                     position_x = brique.get_position()[0]
                     position_y = brique.get_position()[1]
                     brique_GUI = self.canevas.create_rectangle(position_x , position_y , position_x+25 , position_y+25 , fill = 'red')
-                    lst_ligne_brique.append([brique,brique_GUI])
-                coord_all_wall.append(lst_ligne_brique)
+                    valren = [brique,brique_GUI]
+                    lst_colonne_brique.append(valren)
+                mur.append(lst_colonne_brique)
+            coord_all_wall.append(mur)
 
