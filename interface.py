@@ -12,6 +12,7 @@ To do :
 
 import tkinter
 import librairie as lib
+import random
 
 #### classe interface
 
@@ -65,6 +66,10 @@ class Interface_game ():
         liste_shoot = []
         self.vaisseau_joueur()
         self.Vaisseau_alien()
+        self.tir_alien()
+        self.deplacement_shoot()
+        self.colision()
+
 
     def Vaisseau_alien(self):
         """
@@ -116,7 +121,7 @@ class Interface_game ():
                 for vaisseau in ligne:
                     vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
                     self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
-        if coord_all_alien[-1][0][0].get_position()[1] < 640 : 
+        if coord_all_alien[-1][0][0].get_position()[1] < 630 : 
             self.mywindow.after(200,self.deplacement_alien)
         else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
@@ -136,7 +141,8 @@ class Interface_game ():
         position_x = mon_vaisseau.get_position()[0]
         position_y = mon_vaisseau.get_position()[1]
         mon_vaisseau_gui = self.canevas.create_rectangle(position_x , position_y , position_x+20 , position_y+20 , fill = 'white')
-    
+        self.vie.set(str(mon_vaisseau.get_vie()))
+
     def deplacement_joueur(self,pTouche):
         global mon_vaisseau
         global mon_vaisseau_gui
@@ -157,10 +163,11 @@ class Interface_game ():
         ball = lib.shoot(pPosition , pAuteur)
         position_x_ball = ball.get_position()[0]
         position_y_ball = ball.get_position()[1]
-        ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'red')
-        liste_shoot.append([ball,ball_gui])
-        # self.deplacement_ball()
-        self.deplacement_shoot()
+        if pAuteur == 0:
+            ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'blue')
+        elif pAuteur == 1:
+            ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'red')
+        liste_shoot.append([ball,ball_gui]) 
 
     def deplacement_shoot(self):
         global liste_shoot
@@ -176,18 +183,18 @@ class Interface_game ():
                 position_x = projectile.get_position()[0]
                 position_y = projectile.get_position()[1]
             self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
-            if position_y == 0 :
+            if position_y == 0 or position_y == 700:
                 self.canevas.delete(projectile_gui)
-        self.mywindow.after(500,self.deplacement_shoot)
+        self.mywindow.after(200,self.deplacement_shoot)
 
-    def deplacement_ball(self):
-        global ball
-        global ball_gui
-        ball.deplacement_haut_shoot()
-        position_x_ball = ball.get_position()[0]
-        position_y_ball = ball.get_position()[1]
-        self.canevas.coords(ball_gui , position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10)
-        self.mywindow.after(500,self.deplacement_ball)
+    # def deplacement_ball(self):
+    #     global ball
+    #     global ball_gui
+    #     ball.deplacement_haut_shoot()
+    #     position_x_ball = ball.get_position()[0]
+    #     position_y_ball = ball.get_position()[1]
+    #     self.canevas.coords(ball_gui , position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10)
+    #     self.mywindow.after(500,self.deplacement_ball)
 
     def tir_joueur(self):
         global mon_vaisseau
@@ -203,3 +210,66 @@ class Interface_game ():
         if touche == 'space' :
             self.tir_joueur()
 
+    def tir_alien(self):
+        chance = random.randint(1,10)
+        if chance <= 6 :
+            global coord_all_alien
+            num = random.randint(0,4)
+            alien_tireur  = coord_all_alien[2][num][0]
+            position_tireur = alien_tireur.get_position()
+            type_tireur = alien_tireur.get_type()
+            self.create_ball(position_tireur,type_tireur)
+        self.mywindow.after(2000,self.tir_alien)
+
+    def colision_check (self,element1,element2):
+        x_element1 = element1.get_position()[0]
+        y_element1 = element1.get_position()[1]
+        x_element2 = element2.get_position()[0]
+        y_element2 = element2.get_position()[1]
+        hit_box_1 = [x_element1,x_element1+20,y_element1,y_element1+20]
+        hit_box_2 = [x_element2,x_element2+20,y_element2,y_element2+20]
+        if (hit_box_2[0] <= x_element1-10 <= hit_box_2[1] and hit_box_2[2] <= y_element1-10 <= hit_box_2[3]) or (hit_box_2[0] <= x_element1+10 <= hit_box_2[1] and hit_box_2[2] <= y_element1+10 <= hit_box_2[3]) :
+            return True
+        else :
+            return False
+
+    def colision (self):
+        global coord_all_alien
+        global liste_shoot
+        global mon_vaisseau
+        global mon_vaisseau_gui
+        liste_tempo = liste_shoot
+        for i,val in enumerate (liste_shoot):
+            shoot = val[0]
+            shoot_gui = val[1]
+            auteur = shoot.get_auteur()
+            if auteur == 1 :
+                validite = self.colision_check(shoot,mon_vaisseau)
+                if validite :
+                    if mon_vaisseau.get_vie() > 1 :
+                        self.canevas.delete(shoot_gui)
+                    elif mon_vaisseau.get_vie() == 1 :
+                        self.canevas.delete(mon_vaisseau_gui,shoot_gui)
+                    new_vie = mon_vaisseau.get_vie() - 1
+                    mon_vaisseau.set_vie(new_vie)
+                    self.vie.set(str(mon_vaisseau.get_vie()))
+                    liste_shoot.remove(val)
+            elif auteur == 0 :
+                for ligne in coord_all_alien :
+                    for vaisseau in ligne :
+                        vaisseau_enemi = vaisseau[0]
+                        vaisseau_enemi_gui = vaisseau[1]
+                        validite = self.colision_check(shoot,vaisseau_enemi)
+                        if validite :
+                            self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
+                            liste_shoot.remove(val)
+                            # ligne.remove(vaisseau)
+                for val2 in liste_tempo[:i]+liste_tempo[i+1:]:
+                    shoot2 = val2[0]
+                    shoot2_gui = val2[1]
+                    validite = self.colision_check(shoot,shoot2)
+                    if validite :
+                        self.canevas.delete(shoot2_gui,shoot_gui)
+                        liste_shoot.remove(val)
+                        liste_shoot.remove(val2)
+        self.mywindow.after(100,self.colision)
