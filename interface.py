@@ -14,6 +14,7 @@ import tkinter
 import librairie as lib
 import random
 
+
 #### classe interface
 
 class Interface_game ():
@@ -69,6 +70,7 @@ class Interface_game ():
         self.tir_alien()
         self.deplacement_shoot()
         self.colision()
+        self.create_wall()
 
 
     def Vaisseau_alien(self):
@@ -210,6 +212,7 @@ class Interface_game ():
         if touche == 'space' :
             self.tir_joueur()
 
+
     def tir_alien(self):
         chance = random.randint(1,10)
         if chance <= 6 :
@@ -273,3 +276,25 @@ class Interface_game ():
                         liste_shoot.remove(val)
                         liste_shoot.remove(val2)
         self.mywindow.after(100,self.colision)
+
+    def create_wall(self):
+        """
+        Fonction qui créé un mur de brique (3 briques de hauteurs et 5 de largeurs)
+        """
+        global coord_all_wall
+        
+        coord_all_wall = []
+        #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
+        position_mur = [random.randint(0,330), random.randint(380,590), random.randint(660,900)]
+        
+        for pos in position_mur:
+            for ligne in range(5): 
+                lst_ligne_brique = []
+                for colonne in range(3):
+                    brique = lib.brique([pos+25*ligne,475+25*colonne])
+                    position_x = brique.get_position()[0]
+                    position_y = brique.get_position()[1]
+                    brique_GUI = self.canevas.create_rectangle(position_x , position_y , position_x+25 , position_y+25 , fill = 'red')
+                    lst_ligne_brique.append([brique,brique_GUI])
+                coord_all_wall.append(lst_ligne_brique)
+
