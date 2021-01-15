@@ -99,7 +99,7 @@ class Interface_game ():
                 vaisseau_alien_gui = self.canevas.create_rectangle(position_x-25, position_y-25, position_x+25, position_y+25, fill = "blue")
                 coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
             coord_all_alien.append(coord_ligne_alien)
-        # self.deplacement_alien()
+        self.deplacement_alien()                                                          
 
     def deplacement_alien(self):
         """
@@ -113,9 +113,10 @@ class Interface_game ():
         global dx
         global dy
         global coord_all_alien
-        if coord_all_alien[-1][-1][0].get_position()[0]+10+dx > 1000 : #On prend l'alien le plus en bas à droite de l'écran
+
+        if coord_all_alien[0][-1][0].get_position()[0]+10+dx > 1000 or coord_all_alien[1][-1][0].get_position()[0]+10+dx > 1000 or coord_all_alien[2][-1][0].get_position()[0]+10+dx > 1000: #On prend la colonne d'alien la plus à droite de l'écran
             dx = -dx
-        if coord_all_alien[-1][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en bas à gauche de l'écran
+        if coord_all_alien[0][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[1][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[2][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en à gauche de l'écran
             dx = -dx
         
             for ligne in coord_all_alien:
@@ -124,12 +125,11 @@ class Interface_game ():
         for ligne in coord_all_alien:
                 for vaisseau in ligne:
                     vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
-                    self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-25,vaisseau[0].get_position()[1]-25,vaisseau[0].get_position()[0]+25,vaisseau[0].get_position()[1]+25)
+                    try : #Si le vaisseau est tjr à l'écran, on le fait bouger
+                        self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-25,vaisseau[0].get_position()[1]-25,vaisseau[0].get_position()[0]+25,vaisseau[0].get_position()[1]+25)
+                    except IndexError: #Sinon, on ne s'en occupe pas
+                        pass
         if coord_all_alien[-1][0][0].get_position()[1] < 640 : 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/dev
             self.mywindow.after(200,self.deplacement_alien)
         else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
@@ -195,15 +195,6 @@ class Interface_game ():
                 self.canevas.delete(projectile_gui)
         self.mywindow.after(200,self.deplacement_shoot)
 
-    # def deplacement_ball(self):
-    #     global ball
-    #     global ball_gui
-    #     ball.deplacement_haut_shoot()
-    #     position_x_ball = ball.get_position()[0]
-    #     position_y_ball = ball.get_position()[1]
-    #     self.canevas.coords(ball_gui , position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10)
-    #     self.mywindow.after(500,self.deplacement_ball)
-
     def tir_joueur(self):
         global mon_vaisseau
         position_initial = mon_vaisseau.get_position()
@@ -262,8 +253,10 @@ class Interface_game ():
                             validite_wall = self.colision_check(shoot,fragment)
                             if validite_wall :
                                 self.canevas.delete(shoot_gui,fragment_gui)
-                                liste_shoot.remove(val1)
-                                colonne.remove(val2)
+                                if val1 in liste_shoot : 
+                                    liste_shoot.remove(val1)
+                                if val2 in colonne :
+                                    colonne.remove(val2)
                 validite_joueur = self.colision_check(shoot,mon_vaisseau)
                 if validite_joueur :
                     if mon_vaisseau.get_vie() > 1 :
@@ -278,14 +271,17 @@ class Interface_game ():
             elif auteur == 0 :
                 for ligne in coord_all_alien :
                     for vaisseau in ligne :
-                        vaisseau_enemi = vaisseau[0]
-                        vaisseau_enemi_gui = vaisseau[1]
-                        validite = self.colision_check(shoot,vaisseau_enemi)
-                        if validite :
-                            self.add_score(vaisseau_enemi.get_type())
-                            self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
-                            liste_shoot.remove(val1)
-                            # ligne.remove(vaisseau)
+                        if len(vaisseau) == 2 :
+                            vaisseau_enemi = vaisseau[0]
+                            vaisseau_enemi_gui = vaisseau[1]
+                            validite = self.colision_check(shoot,vaisseau_enemi)
+                            if validite :
+                                self.add_score(vaisseau_enemi.get_type())       
+                                self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
+                                if val1 in liste_shoot :
+                                    liste_shoot.remove(val1)
+                                if vaisseau_enemi_gui in vaisseau :
+                                    vaisseau.remove(vaisseau_enemi_gui)
                 for val3 in liste_tempo[:i]+liste_tempo[i+1:]:
                     shoot2 = val3[0]
                     shoot2_gui = val3[1]
