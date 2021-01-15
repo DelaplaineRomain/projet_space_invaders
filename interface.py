@@ -99,7 +99,7 @@ class Interface_game ():
                 vaisseau_alien_gui = self.canevas.create_rectangle(position_x-25, position_y-25, position_x+25, position_y+25, fill = "blue")
                 coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
             coord_all_alien.append(coord_ligne_alien)
-        # self.deplacement_alien()
+        self.deplacement_alien()
 
     def deplacement_alien(self):
         """
