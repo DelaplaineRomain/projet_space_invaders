@@ -63,6 +63,10 @@ class Interface_game ():
         self.mywindow.mainloop()
 
     def game_start(self):
+        global current_game_id        #permettra d'arreter les fonctions en cours d'exécution lors de la fin de partie
+        current_game_id = 0
+        global game_id
+        game_id = 0
         global score
         score = 0
         self.score.set(str(score))
@@ -134,9 +138,19 @@ class Interface_game ():
         """
         Efface tout le canevas et affiche game over
         """
+        global current_game_id
+        global game_id
+        global liste_shoot
+        global coord_all_alien
+        global coord_all_wall
+        global mon_vaisseau
         self.canevas.delete("all")
-        self.canevas.create_text(50,50,"Game \n Over")
-        return
+        game_id = current_game_id + 1
+        liste_shoot = []
+        coord_all_alien = []
+        coord_all_wall = []
+        mon_vaisseau = None
+        self.canevas.create_text( 500 , 300 , text = "Game\nOver", fill = "white" , font = ('Courier', 150, 'bold'))
 
     def vaisseau_joueur(self):
         global mon_vaisseau
@@ -175,21 +189,24 @@ class Interface_game ():
 
     def deplacement_shoot(self):
         global liste_shoot
-        for val in liste_shoot:
-            projectile = val[0]
-            projectile_gui = val[1]
-            if projectile.get_auteur() == 0 :
-                projectile.deplacement_haut_shoot()
-                position_x = projectile.get_position()[0]
-                position_y = projectile.get_position()[1]
-            elif projectile.get_auteur() == 1 :
-                projectile.deplacement_bas_shoot()
-                position_x = projectile.get_position()[0]
-                position_y = projectile.get_position()[1]
-            self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
-            if position_y == 0 or position_y == 700:
-                self.canevas.delete(projectile_gui)
-        self.mywindow.after(200,self.deplacement_shoot)
+        global game_id
+        global current_game_id
+        if game_id == current_game_id:
+            for val in liste_shoot:
+                projectile = val[0]
+                projectile_gui = val[1]
+                if projectile.get_auteur() == 0 :
+                    projectile.deplacement_haut_shoot()
+                    position_x = projectile.get_position()[0]
+                    position_y = projectile.get_position()[1]
+                elif projectile.get_auteur() == 1 :
+                    projectile.deplacement_bas_shoot()
+                    position_x = projectile.get_position()[0]
+                    position_y = projectile.get_position()[1]
+                self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
+                if position_y == 0 or position_y == 700:
+                    self.canevas.delete(projectile_gui)
+            self.mywindow.after(200,self.deplacement_shoot)
 
     # def deplacement_ball(self):
     #     global ball
@@ -214,25 +231,27 @@ class Interface_game ():
         if touche == 'space' :
             self.tir_joueur()
 
-
     def tir_alien(self):
-        chance = random.randint(1,10)
-        if chance <= 6 :
-            global coord_all_alien
-            num = random.randint(0,4)
-            alien_tireur  = coord_all_alien[2][num][0]
-            position_tireur = alien_tireur.get_position()
-            type_tireur = alien_tireur.get_type()
-            self.create_ball(position_tireur,type_tireur)
-        self.mywindow.after(2000,self.tir_alien)
+        global game_id
+        global current_game_id
+        if game_id == current_game_id:
+            chance = random.randint(1,10)
+            if chance <= 6 :
+                global coord_all_alien
+                num = random.randint(0,4)
+                alien_tireur  = coord_all_alien[2][num][0]
+                position_tireur = alien_tireur.get_position()
+                type_tireur = alien_tireur.get_type()
+                self.create_ball(position_tireur,type_tireur)
+            self.mywindow.after(2000,self.tir_alien)
 
     def colision_check (self,element1,element2):
         x_element1 = element1.get_position()[0]
         y_element1 = element1.get_position()[1]
         x_element2 = element2.get_position()[0]
         y_element2 = element2.get_position()[1]
-        hit_box_1 = [x_element1,x_element1+20,y_element1,y_element1+20]
-        hit_box_2 = [x_element2,x_element2+20,y_element2,y_element2+20]
+        # hit_box_1 = [x_element1,x_element1+20,y_element1,y_element1+20]
+        hit_box_2 = [x_element2-25,x_element2+25,y_element2-25,y_element2+25]
         if (hit_box_2[0] <= x_element1-10 <= hit_box_2[1] and hit_box_2[2] <= y_element1-10 <= hit_box_2[3]) or (hit_box_2[0] <= x_element1+10 <= hit_box_2[1] and hit_box_2[2] <= y_element1+10 <= hit_box_2[3]) :
             return True
         else :
@@ -244,62 +263,66 @@ class Interface_game ():
         global mon_vaisseau
         global mon_vaisseau_gui
         global coord_all_wall
-        liste_tempo = liste_shoot
-        for i,val1 in enumerate (liste_shoot):                #val1 représente la liste [shoot,shoot_gui]
-            shoot = val1[0]
-            shoot_gui = val1[1]
-            auteur = shoot.get_auteur()
-            if auteur == 1 or auteur == 2 or auteur == 3:
-                for mur in coord_all_wall :
-                    for colonne in mur :
-                        for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
-                            fragment = val2[0]
-                            fragment_gui = val2[1]
-                            validite_wall = self.colision_check(shoot,fragment)
-                            if validite_wall :
-                                self.canevas.delete(shoot_gui,fragment_gui)
-                                liste_shoot.remove(val1)
-                                colonne.remove(val2)
-                validite_joueur = self.colision_check(shoot,mon_vaisseau)
-                if validite_joueur :
-                    if mon_vaisseau.get_vie() > 1 :
-                        self.canevas.delete(shoot_gui)
-                    elif mon_vaisseau.get_vie() == 1 :
-                        self.canevas.delete(mon_vaisseau_gui,shoot_gui)
-                    new_vie = mon_vaisseau.get_vie() - 1
-                    mon_vaisseau.set_vie(new_vie)
-                    self.vie.set(str(mon_vaisseau.get_vie()))
-                    liste_shoot.remove(val1)
-
-            elif auteur == 0 :
-                for ligne in coord_all_alien :
-                    for vaisseau in ligne :
-                        vaisseau_enemi = vaisseau[0]
-                        vaisseau_enemi_gui = vaisseau[1]
-                        validite = self.colision_check(shoot,vaisseau_enemi)
-                        if validite :
-                            self.add_score(vaisseau_enemi.get_type())
-                            self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
-                            liste_shoot.remove(val1)
-                            # ligne.remove(vaisseau)
-                for val3 in liste_tempo[:i]+liste_tempo[i+1:]:
-                    shoot2 = val3[0]
-                    shoot2_gui = val3[1]
-                    validite = self.colision_check(shoot,shoot2)
-                    if validite :
-                        self.canevas.delete(shoot2_gui,shoot_gui)
+        global game_id
+        global current_game_id
+        if game_id == current_game_id:
+            liste_tempo = liste_shoot
+            for i,val1 in enumerate (liste_shoot):                #val1 représente la liste [shoot,shoot_gui]
+                shoot = val1[0]
+                shoot_gui = val1[1]
+                auteur = shoot.get_auteur()
+                if auteur == 1 or auteur == 2 or auteur == 3:
+                    for mur in coord_all_wall :
+                        for colonne in mur :
+                            for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
+                                fragment = val2[0]
+                                fragment_gui = val2[1]
+                                validite_wall = self.colision_check(shoot,fragment)
+                                if validite_wall :
+                                    self.canevas.delete(shoot_gui,fragment_gui)
+                                    liste_shoot.remove(val1)
+                                    colonne.remove(val2)
+                    validite_joueur = self.colision_check(shoot,mon_vaisseau)
+                    if validite_joueur :
+                        if mon_vaisseau.get_vie() > 1 :
+                            self.canevas.delete(shoot_gui)
+                        elif mon_vaisseau.get_vie() == 1 :
+                            self.canevas.delete(mon_vaisseau_gui,shoot_gui)
+                            self.fin_partie()
+                        new_vie = mon_vaisseau.get_vie() - 1
+                        mon_vaisseau.set_vie(new_vie)
+                        self.vie.set(str(mon_vaisseau.get_vie()))
                         liste_shoot.remove(val1)
-                        liste_shoot.remove(val3)
-                for mur in coord_all_wall :
-                    for colonne in mur :
-                        for val4 in colonne :     #val4 représente la liste [brique,brique_gui]
-                            fragment = val4[0]
-                            fragment_gui = val4[1]
-                            validite_wall = self.colision_check(shoot,fragment)
-                            if validite_wall :
-                                self.canevas.delete(shoot_gui)
-                                liste_shoot.remove(val1)          
-        self.mywindow.after(100,self.colision)
+
+                elif auteur == 0 :
+                    for ligne in coord_all_alien :
+                        for vaisseau in ligne :
+                            vaisseau_enemi = vaisseau[0]
+                            vaisseau_enemi_gui = vaisseau[1]
+                            validite = self.colision_check(shoot,vaisseau_enemi)
+                            if validite :
+                                self.add_score(vaisseau_enemi.get_type())
+                                self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
+                                liste_shoot.remove(val1)
+                                # ligne.remove(vaisseau)
+                    for val3 in liste_tempo[:i]+liste_tempo[i+1:]:
+                        shoot2 = val3[0]
+                        shoot2_gui = val3[1]
+                        validite = self.colision_check(shoot,shoot2)
+                        if validite :
+                            self.canevas.delete(shoot2_gui,shoot_gui)
+                            liste_shoot.remove(val1)
+                            liste_shoot.remove(val3)
+                    for mur in coord_all_wall :
+                        for colonne in mur :
+                            for val4 in colonne :     #val4 représente la liste [brique,brique_gui]
+                                fragment = val4[0]
+                                fragment_gui = val4[1]
+                                validite_wall = self.colision_check(shoot,fragment)
+                                if validite_wall :
+                                    self.canevas.delete(shoot_gui)
+                                    liste_shoot.remove(val1)          
+            self.mywindow.after(100,self.colision)
 
     def create_wall(self):
         """
