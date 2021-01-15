@@ -96,7 +96,7 @@ class Interface_game ():
                 vaisseau_alien = lib.Vaisseau(1,20,1,[20+100*colonne,20+100*ligne])
                 position_x = vaisseau_alien.get_position()[0]
                 position_y = vaisseau_alien.get_position()[1]
-                vaisseau_alien_gui = self.canevas.create_rectangle(position_x-10, position_y-10, position_x+10, position_y+10, fill='blue')
+                vaisseau_alien_gui = self.canevas.create_rectangle(position_x-25, position_y-25, position_x+25, position_y+25, fill = "blue")
                 coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
             coord_all_alien.append(coord_ligne_alien)
         # self.deplacement_alien()
@@ -124,8 +124,8 @@ class Interface_game ():
         for ligne in coord_all_alien:
                 for vaisseau in ligne:
                     vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
-                    self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-10,vaisseau[0].get_position()[1]-10,vaisseau[0].get_position()[0]+10,vaisseau[0].get_position()[1]+10)
-        if coord_all_alien[-1][0][0].get_position()[1] < 630 : 
+                    self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-25,vaisseau[0].get_position()[1]-25,vaisseau[0].get_position()[0]+25,vaisseau[0].get_position()[1]+25)
+        if coord_all_alien[-1][0][0].get_position()[1] < 640 : 
             self.mywindow.after(200,self.deplacement_alien)
         else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
@@ -310,7 +310,6 @@ class Interface_game ():
         coord_all_wall = []
         #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
         position_mur = [random.randint(0,330), random.randint(380,590), random.randint(660,900)]
-        
         for pos in position_mur:
             mur = []
             for colonne in range(5): 
