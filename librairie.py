@@ -55,15 +55,19 @@ class Vaisseau() :
             self.__position[1] -= 10
 
 class shoot():
-    def __init__(self,pPosition,pAuteur):
+    def __init__(self,pPosition,pAuteur,pType):
         self.__position_ball = pPosition
         self.__auteur = pAuteur
+        self.__type = pType
 
     def get_position(self):
         return self.__position_ball[:]
 
     def get_auteur(self):
         return self.__auteur
+
+    def get_type(self):
+        return self.__type
 
     def deplacement_bas_shoot(self):
         if self.__position_ball[1] <= 690 :
@@ -74,10 +78,12 @@ class shoot():
             self.__position_ball[1] -= 10
 
 class brique():
-    def __init__(self,pPosition):
+    def __init__(self,pPosition,pType):
         self.__position = pPosition
+        self.__type = pType
     
     def get_position(self):
         return self.__position[:]
 
-
+    def get_type(self):
+        return self.__type
