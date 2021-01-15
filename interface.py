@@ -65,6 +65,8 @@ class Interface_game ():
     def game_start(self):
         global score
         score = 0
+        global cadence
+        cadence = 8
         self.score.set(str(score))
         global liste_shoot
         liste_shoot = []
@@ -113,15 +115,23 @@ class Interface_game ():
         global dx
         global dy
         global coord_all_alien
+        global cadence
 
         if coord_all_alien[0][-1][0].get_position()[0]+10+dx > 1000 or coord_all_alien[1][-1][0].get_position()[0]+10+dx > 1000 or coord_all_alien[2][-1][0].get_position()[0]+10+dx > 1000: #On prend la colonne d'alien la plus à droite de l'écran
             dx = -dx
         if coord_all_alien[0][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[1][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[2][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en à gauche de l'écran
             dx = -dx
-        
-            for ligne in coord_all_alien:
-                for vaisseau in ligne:
-                   vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
+            if cadence < 15:
+                cadence += 1
+            print(coord_all_alien[0][0][0].get_position()[1] - 10 + dy)
+            if coord_all_alien[0][0][0].get_position()[1] - 10 + dy < 220 : #Si les aliens sont au dessus des ilots, ils peuvent encore descendre
+                for ligne in coord_all_alien:
+                    for vaisseau in ligne:
+                        vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
+            elif len(coord_all_wall) == 0 : #Si tout les murs ont été détruit, les aliens peuvent continuer à descendre
+                for ligne in coord_all_alien:
+                    for vaisseau in ligne:
+                        vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
         for ligne in coord_all_alien:
                 for vaisseau in ligne:
                     vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
@@ -211,15 +221,56 @@ class Interface_game ():
 
 
     def tir_alien(self):
-        chance = random.randint(1,10)
-        if chance <= 6 :
+        global cadence
+        chance = random.randint(1,15)
+        if chance <= cadence :
             global coord_all_alien
-            num = random.randint(0,4)
-            alien_tireur  = coord_all_alien[2][num][0]
-            position_tireur = alien_tireur.get_position()
-            type_tireur = alien_tireur.get_type()
-            self.create_ball(position_tireur,type_tireur)
-        self.mywindow.after(2000,self.tir_alien)
+            if cadence < 13 : 
+                num1 = random.randint(0,4)
+                if len(coord_all_alien[2][num1]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
+                    alien_tireur  = coord_all_alien[2][num1][0]
+                elif len(coord_all_alien[1][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[1][num1][0]
+                elif len(coord_all_alien[0][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[0][num1][0]
+                try :
+                    position_tireur = alien_tireur.get_position()
+                    type_tireur = alien_tireur.get_type()
+                    self.create_ball(position_tireur,type_tireur)
+                except UnboundLocalError :
+                    pass
+            else :
+            #if len(coord_all_alien[2][colonne]) == 2 or len(coord_all_alien[1][colonne]) == 2 or len(coord_all_alien[0][colonne]) == 2 : #S'il reste des aliens sur les colonnes 0 1 ou 2
+                num1 = random.randint(0,2) #On choisis une colonne au hasard et on fera tirer cet alien
+                if len(coord_all_alien[2][num1]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
+                    alien_tireur  = coord_all_alien[2][num1][0]
+                elif len(coord_all_alien[1][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[1][num1][0]
+                elif len(coord_all_alien[0][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[0][num1][0]
+                try :
+                    position_tireur = alien_tireur.get_position()
+                    type_tireur = alien_tireur.get_type()
+                    self.create_ball(position_tireur,type_tireur)
+                except UnboundLocalError :
+                    pass
+                            
+                #if len(coord_all_alien[2][colonne]) == 2 or len(coord_all_alien[1][colonne]) == 2 or len(coord_all_alien[0][colonne]) == 2: #S'il reste des aliens sur les colonnes 0 1 ou 2
+                num2 = random.randint(3,4) #On choisis une colonne au hasard et on fera tirer cet alien
+                if len(coord_all_alien[2][num2]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
+                    alien_tireur  = coord_all_alien[2][num2][0]
+                elif len(coord_all_alien[1][num2]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[1][num2][0]
+                elif len(coord_all_alien[0][num2]) == 2 : #Sinon on fait tirer le vaisseau du dessus
+                    alien_tireur  = coord_all_alien[0][num2][0]
+                try :
+                    position_tireur = alien_tireur.get_position()
+                    type_tireur = alien_tireur.get_type()
+                    self.create_ball(position_tireur,type_tireur)
+                except UnboundLocalError :
+                    pass
+
+        self.mywindow.after(1000,self.tir_alien)
 
     def colision_check (self,element1,element2):
         x_element1 = element1.get_position()[0]
@@ -245,18 +296,28 @@ class Interface_game ():
             shoot_gui = val1[1]
             auteur = shoot.get_auteur()
             if auteur == 1 or auteur == 2 or auteur == 3:
-                for mur in coord_all_wall :
-                    for colonne in mur :
-                        for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
-                            fragment = val2[0]
-                            fragment_gui = val2[1]
-                            validite_wall = self.colision_check(shoot,fragment)
-                            if validite_wall :
-                                self.canevas.delete(shoot_gui,fragment_gui)
-                                if val1 in liste_shoot : 
-                                    liste_shoot.remove(val1)
-                                if val2 in colonne :
-                                    colonne.remove(val2)
+                try : #S'il reste des briques à détruire
+                    for mur in coord_all_wall :
+                        for colonne in mur :
+                            for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
+                                fragment = val2[0]
+                                fragment_gui = val2[1]
+                                validite_wall = self.colision_check(shoot,fragment)
+                                if validite_wall :
+                                    self.canevas.delete(shoot_gui,fragment_gui)
+                                    if val1 in liste_shoot : 
+                                        liste_shoot.remove(val1)
+                                    if val2 in colonne :
+                                        colonne.remove(val2)
+                            if colonne in mur :
+                                if len(colonne) == 0 :
+                                    mur.remove(colonne) 
+                    if mur in coord_all_wall :
+                        if len(mur) == 0 :
+                            coord_all_wall.remove(mur)
+                except UnboundLocalError : #Sinon on passe
+                    pass
+
                 validite_joueur = self.colision_check(shoot,mon_vaisseau)
                 if validite_joueur :
                     if mon_vaisseau.get_vie() > 1 :
@@ -288,8 +349,10 @@ class Interface_game ():
                     validite = self.colision_check(shoot,shoot2)
                     if validite :
                         self.canevas.delete(shoot2_gui,shoot_gui)
-                        liste_shoot.remove(val1)
-                        liste_shoot.remove(val3)
+                        if val1 in liste_shoot :
+                            liste_shoot.remove(val1)
+                        if val3 in liste_shoot :
+                            liste_shoot.remove(val3)
                 for mur in coord_all_wall :
                     for colonne in mur :
                         for val4 in colonne :     #val4 représente la liste [brique,brique_gui]
@@ -309,7 +372,7 @@ class Interface_game ():
         
         coord_all_wall = []
         #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
-        position_mur = [random.randint(0,330), random.randint(380,590), random.randint(660,900)]
+        position_mur = [random.randint(200,275), random.randint(400,575), random.randint(700,775)]
         for pos in position_mur:
             mur = []
             for colonne in range(5): 
