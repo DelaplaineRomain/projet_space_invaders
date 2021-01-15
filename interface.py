@@ -63,6 +63,9 @@ class Interface_game ():
         self.mywindow.mainloop()
 
     def game_start(self):
+        global score
+        score = 0
+        self.score.set(str(score))
         global liste_shoot
         liste_shoot = []
         self.vaisseau_joueur()
@@ -96,7 +99,7 @@ class Interface_game ():
                 vaisseau_alien_gui = self.canevas.create_rectangle(position_x-25, position_y-25, position_x+25, position_y+25, fill = "blue")
                 coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
             coord_all_alien.append(coord_ligne_alien)
-        self.deplacement_alien()    
+        # self.deplacement_alien()
 
     def deplacement_alien(self):
         """
@@ -123,17 +126,20 @@ class Interface_game ():
                     vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
                     self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0]-25,vaisseau[0].get_position()[1]-25,vaisseau[0].get_position()[0]+25,vaisseau[0].get_position()[1]+25)
         if coord_all_alien[-1][0][0].get_position()[1] < 640 : 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/dev
             self.mywindow.after(200,self.deplacement_alien)
         else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
             self.fin_partie()
         
     def fin_partie(self):
         """
-        Affiche un message de game over
-        Pour l'instant sur la console
+        Efface tout le canevas et affiche game over
         """
-        print("game over")
+        self.canevas.delete("all")
+        self.canevas.create_text(50,50,"Game \n Over")
         return
 
     def vaisseau_joueur(self):
@@ -247,7 +253,7 @@ class Interface_game ():
             shoot = val1[0]
             shoot_gui = val1[1]
             auteur = shoot.get_auteur()
-            if auteur == 1 :
+            if auteur == 1 or auteur == 2 or auteur == 3:
                 for mur in coord_all_wall :
                     for colonne in mur :
                         for val2 in colonne :     #val2 représente la liste [brique,brique_gui]                            
@@ -276,6 +282,7 @@ class Interface_game ():
                         vaisseau_enemi_gui = vaisseau[1]
                         validite = self.colision_check(shoot,vaisseau_enemi)
                         if validite :
+                            self.add_score(vaisseau_enemi.get_type())
                             self.canevas.delete(vaisseau_enemi_gui,shoot_gui)
                             liste_shoot.remove(val1)
                             # ligne.remove(vaisseau)
@@ -307,7 +314,6 @@ class Interface_game ():
         coord_all_wall = []
         #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
         position_mur = [random.randint(0,330), random.randint(380,590), random.randint(660,900)]
-        
         for pos in position_mur:
             mur = []
             for colonne in range(5): 
@@ -322,3 +328,13 @@ class Interface_game ():
                 mur.append(lst_colonne_brique)
             coord_all_wall.append(mur)
 
+    def add_score (self,pType):
+        global score
+        if pType == 1 :
+            point = 30
+        elif pType == 2 :
+            point = 10
+        elif pType == 3 :
+            point = 150
+        score += point
+        self.score.set(str(score))
