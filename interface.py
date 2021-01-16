@@ -4,8 +4,9 @@
 """
 objectif : créer le jeu space invaders 
 Fait par Gouchon Léo et Delaplaine Romain
-Date de dernière modification : 18/12/2020
-To do : 
+Date de dernière modification : 16/01/2020
+To do : commenter le reste du code
+        remplacer les rectangles par des images
 """
 
 #### les imports
@@ -63,17 +64,22 @@ class Interface_game ():
         self.mywindow.mainloop()
 
     def game_start(self):
-        self.canevas.delete("all")
-        global current_game_id        #permettra d'arreter les fonctions en cours d'exécution lors de la fin de partie
-        current_game_id = 0
+        """
+        fonction qui permet d'initialiser une partie
+        elle se lance quand on appuie sur le bouton "bouton_lancer"
+        """
         global game_id
-        game_id = 0
+        global current_game_id        #permettra d'arreter les fonctions en cours d'exécution lors de la fin de partie
+        global liste_shoot
         global score
-        score = 0
         global cadence
+
+        self.canevas.delete("all")
+        current_game_id = 0
+        game_id = 0
+        score = 0
         cadence = 8
         self.score.set(str(score))
-        global liste_shoot
         liste_shoot = []
         self.vaisseau_joueur()
         self.create_wall()
@@ -84,7 +90,11 @@ class Interface_game ():
 
     def Vaisseau_alien(self):
         """
-        génère une ligne de 5 vaisseau_alien
+        génère les vaisseaux ennemis
+        
+        stockage des vaisseaux_aliens : 
+        coord_all_alien contient les listes coord_ligne_alien qui contiennent des sous-listes [vaisseau, vaisseau_gui]
+        coord_all_alien = [[ligne 1],[ligne 2],[[vaisseau1, vaisseau1_gui],[vaisseau2, vaisseau2_gui], [etc]]] 
         """
         global vaisseau_alien
         global vaisseau_alien_gui      
@@ -95,8 +105,9 @@ class Interface_game ():
         global coord_all_alien
         dx = 40
         dy = 40
-        coord_all_alien = [] #coordonné de toutes les lignes des aliens : [[ligne 1],[ligne 2],[ligne 3]]
+        coord_all_alien = [] 
         #On créé 5 vaisseaux à la suite sur une même ligne 3 fois
+        #On aura alors un "tableau" de vaisseau de 3x5 (3 lignes, 5 colonnes)
         for ligne in range(3):
             coord_ligne_alien = [] #Liste vide qui sera remplie par les vaisseaux d'une même ligne
             for colonne in range(5):
@@ -106,14 +117,14 @@ class Interface_game ():
                 vaisseau_alien_gui = self.canevas.create_rectangle(position_x, position_y, position_x+50, position_y+50, fill = "blue")
                 coord_ligne_alien.append([vaisseau_alien, vaisseau_alien_gui])
             coord_all_alien.append(coord_ligne_alien)
-        self.deplacement_alien()                                                          
+        self.deplacement_alien() #Lance la fonction qui permet de déplacer continuellement les vaisseaux ennemis                                                 
 
     def deplacement_alien(self):
         """
-        déplacement automatique les aliens
+        déplacement automatique des aliens
         le vaisseau bouge toujours en premier vers la droite
         S'il atteint le bord droit, il bougera alors vers la gauche
-        S'il atteint le bord gauche, il descend d'un cran vers le bas
+        S'il atteint le bord gauche, il bougera alors vers la droite ET si on peut, on fait descendre les vaisseaux
         """
         global vaisseau_alien
         global vaisseau_alien_gui
@@ -124,36 +135,49 @@ class Interface_game ():
         global game_id
         global current_game_id
         if game_id == current_game_id:
-            if coord_all_alien[0][-1][0].get_position()[0]+50+dx > 1000 or coord_all_alien[1][-1][0].get_position()[0]+50+dx > 1000 or coord_all_alien[2][-1][0].get_position()[0]+50+dx > 1000: #On prend la colonne d'alien la plus à droite de l'écran
+            #Si un des vaisseaux de la colonne de droite atteint le bord de l'écran, on inverse dx afin que les vaisseaux bougent vers la gauche
+            if coord_all_alien[0][-1][0].get_position()[0]+50+dx > 1000 or coord_all_alien[1][-1][0].get_position()[0]+50+dx > 1000 or coord_all_alien[2][-1][0].get_position()[0]+50+dx > 1000: 
                 dx = -dx
-            if coord_all_alien[0][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[1][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[2][0][0].get_position()[0]-10+dx < 0 : #l'alien qui est le plus en à gauche de l'écran
+            #Si un des vaisseaux de la colonne de gauche atteint le bord de l'écran, on inverse dx afin que les vaisseaux bougent vers la droite
+            if coord_all_alien[0][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[1][0][0].get_position()[0]-10+dx < 0 or coord_all_alien[2][0][0].get_position()[0]-10+dx < 0 :
                 dx = -dx
+                #Quand les vaisseaux atteignent le bord gauche de l'écran, on augmente la cadence de tir des vaisseaux ennemis
                 if cadence < 15:
                     cadence += 1
-                if coord_all_alien[0][0][0].get_position()[1] - 10 + dy < 220 : #Si les aliens sont au dessus des ilots, ils peuvent encore descendre
+                #Si les aliens n'ont pas encore atteint les ilots, ils descendent de dy
+                if coord_all_alien[0][0][0].get_position()[1] - 10 + dy < 220 : 
                     for ligne in coord_all_alien:
                         for vaisseau in ligne:
                             vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
-                elif len(coord_all_wall) == 0 : #Si tout les murs ont été détruit, les aliens peuvent continuer à descendre
+                #Si ils ont atteints les ilots MAIS qu'ils sont tous détruits, alors les vaisseaux continuent à descendre
+                elif len(coord_all_wall) == 0 : 
                     for ligne in coord_all_alien:
                         for vaisseau in ligne:
                             vaisseau[0].set_position([vaisseau[0].get_position()[0],vaisseau[0].get_position()[1]+dy])
+
+            #Dans les conditions d'avant, on actualisait la position du vaisseau, dans cette boucle, on met à jour la position graphique des vaisseaux
             for ligne in coord_all_alien:
                     for vaisseau in ligne:
                         vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
-                        try : #Si le vaisseau est tjr à l'écran, on le fait bouger
+                        #Si le vaisseau est tjr affiché à l'écran, on met à jour sa position graphique
+                        try : 
                             self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0],vaisseau[0].get_position()[1],vaisseau[0].get_position()[0]+50,vaisseau[0].get_position()[1]+50)
-                        except IndexError: #Sinon, on ne s'en occupe pas
+                        #S'il n'est plus affiché, on traite l'erreur qui indique qu'il ne trouve pas le "vaisseau_gui" en ne faisant rien 
+                        #Le vaisseau n'est plus affiché <=> on a supprimé la variable vaisseau_gui de ce vaisseau
+                        except IndexError: 
                             pass
+            #Si les aliens n'ont pas encore atteint la ligne du vaisseau du joueur, on relance cette fonction
             if coord_all_alien[-1][0][0].get_position()[1] < 620 : 
                 self.mywindow.after(200,self.deplacement_alien)
-            else : #Si les aliens les plus en bas sont sur la même ligne que le vaisseau
+            #Si des aliens ont atteint la ligne du vaisseau joueur, on arrête la partie
+            else : 
                 self.fin_partie()
 
         
     def fin_partie(self):
         """
-        Efface tout le canevas et affiche game over
+        Fonction qui se lance quand la partie est terminé (soit le joueur n'a plus de vie, soit des vaisseaux ennemis ont atteint la ligne du vaisseau joueur)
+        Efface toutes les entités du canevas et affiche à la place "Game Over"
         """
         global game_id
         global liste_shoot
@@ -169,6 +193,9 @@ class Interface_game ():
         self.canevas.create_text( 500 , 300 , text = "Game\nOver", fill = "white" , font = ('Courier', 150, 'bold'))
         
     def fonction_exit (self):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global game_id
         global liste_shoot
         global coord_all_alien
@@ -183,6 +210,9 @@ class Interface_game ():
         self.canevas.create_text( 500 , 300 , text = "Restart", fill = "white" , font = ('Courier', 150, 'bold'))
 
     def vaisseau_joueur(self):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global mon_vaisseau
         global mon_vaisseau_gui
         mon_vaisseau = lib.Vaisseau(0,20,3,[100,640])
@@ -192,6 +222,11 @@ class Interface_game ():
         self.vie.set(str(mon_vaisseau.get_vie()))
 
     def deplacement_joueur(self,pTouche):
+        """
+        fonction qui déplace le vaisseau allié
+        Input : 
+            pTouche : touche sur laquelle le joueur appuie
+        """
         global mon_vaisseau
         global mon_vaisseau_gui
         if not (mon_vaisseau == None):
@@ -206,6 +241,12 @@ class Interface_game ():
             self.canevas.coords(mon_vaisseau_gui , position_x , position_y , position_x+25 , position_y+25)
 
     def create_ball(self, pPosition , pAuteur):
+        """
+        INSERER EXPLICATION FONCTION
+        Input : 
+            pPosition : 
+            pAuteur : 
+        """
         global ball
         global ball_gui
         global liste_shoot
@@ -219,6 +260,9 @@ class Interface_game ():
         liste_shoot.append([ball,ball_gui]) 
 
     def deplacement_shoot(self):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global liste_shoot
         global game_id
         global current_game_id
@@ -240,12 +284,18 @@ class Interface_game ():
             self.mywindow.after(200,self.deplacement_shoot)
 
     def tir_joueur(self):
+        """
+        fonction qui lance un tir alié depuis les coordonnés du vaisseau alié
+        """
         global mon_vaisseau
         position_initial = mon_vaisseau.get_position()
         type_initial = mon_vaisseau.get_type()
         self.create_ball(position_initial,type_initial)
         
     def gestion_keyEvent(self,event):
+        """
+        fonction qui vérifie si le joueur appuie sur une touche autorisée et active la fonction en conséquence
+        """
         touche = event.keysym
         liste = ['q','d','Right','Left']
         if touche in liste :
@@ -254,6 +304,9 @@ class Interface_game ():
             self.tir_joueur()
 
     def tir_alien(self):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global game_id
         global current_game_id
         global cadence
@@ -269,14 +322,15 @@ class Interface_game ():
                         alien_tireur  = coord_all_alien[1][num1][0]
                     elif len(coord_all_alien[0][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
                         alien_tireur  = coord_all_alien[0][num1][0]
+                    #Si un des if ou elif a fonctionné, le try marchera
                     try :
                         position_tireur = alien_tireur.get_position()
                         type_tireur = alien_tireur.get_type()
                         self.create_ball(position_tireur,type_tireur)
+                    #Sinon, on ne fait rien
                     except UnboundLocalError :
                         pass
                 else :
-                #if len(coord_all_alien[2][colonne]) == 2 or len(coord_all_alien[1][colonne]) == 2 or len(coord_all_alien[0][colonne]) == 2 : #S'il reste des aliens sur les colonnes 0 1 ou 2
                     num1 = random.randint(0,2) #On choisis une colonne au hasard et on fera tirer cet alien
                     if len(coord_all_alien[2][num1]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
                         alien_tireur  = coord_all_alien[2][num1][0]
@@ -284,14 +338,15 @@ class Interface_game ():
                         alien_tireur  = coord_all_alien[1][num1][0]
                     elif len(coord_all_alien[0][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
                         alien_tireur  = coord_all_alien[0][num1][0]
+                    #Si un des if ou elif a fonctionné, le try marchera
                     try :
                         position_tireur = alien_tireur.get_position()
                         type_tireur = alien_tireur.get_type()
                         self.create_ball(position_tireur,type_tireur)
+                    #Sinon, on ne fait rien
                     except UnboundLocalError :
                         pass
                                 
-                    #if len(coord_all_alien[2][colonne]) == 2 or len(coord_all_alien[1][colonne]) == 2 or len(coord_all_alien[0][colonne]) == 2: #S'il reste des aliens sur les colonnes 0 1 ou 2
                     num2 = random.randint(3,4) #On choisis une colonne au hasard et on fera tirer cet alien
                     if len(coord_all_alien[2][num2]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
                         alien_tireur  = coord_all_alien[2][num2][0]
@@ -299,16 +354,22 @@ class Interface_game ():
                         alien_tireur  = coord_all_alien[1][num2][0]
                     elif len(coord_all_alien[0][num2]) == 2 : #Sinon on fait tirer le vaisseau du dessus
                         alien_tireur  = coord_all_alien[0][num2][0]
+                    #Si un des if ou elif a fonctionné, le try marchera
                     try :
                         position_tireur = alien_tireur.get_position()
                         type_tireur = alien_tireur.get_type()
                         self.create_ball(position_tireur,type_tireur)
+                    #Sinon, on ne fait rien
                     except UnboundLocalError :
                         pass
+
             self.mywindow.after(1000,self.tir_alien)
 
 
     def colision_check (self,element1,element2):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         x_element1 = element1.get_position()[0]
         y_element1 = element1.get_position()[1]
         x_element2 = element2.get_position()[0]
@@ -328,6 +389,9 @@ class Interface_game ():
             return False
 
     def colision (self):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global coord_all_alien
         global liste_shoot
         global mon_vaisseau
@@ -418,12 +482,17 @@ class Interface_game ():
 
     def create_wall(self):
         """
-        Fonction qui créé un mur de brique (3 briques de hauteurs et 5 de largeurs)
+        Fonction qui créé 3 murs de brique (3 briques de hauteurs et 5 de largeurs)
+        On a décidé de rendre la position horizontale des murs aléatoires afin de rendre chaque partie un peu différente
+
+        coord_all_wall : contient les informations des 3 murs
+        mur : contient les informations de chaque colonne de brique de ce mur
+        lst_colonne_brique : contient les informations de chaque brique de cette colonne du mur
+        Chaque brique est représenté par un objet de la classe brique ainsi qu'un élement graphique appelé "brique_GUI"
         """
         global coord_all_wall
         
         coord_all_wall = []
-        #On créé un "tableau" de 5x3 où chaque cellule sera un rectangle
         position_mur = [random.randint(200,275), random.randint(400,575), random.randint(700,775)]
         for pos in position_mur:
             mur = []
@@ -440,6 +509,9 @@ class Interface_game ():
             coord_all_wall.append(mur)
 
     def add_score (self,pType):
+        """
+        INSERER EXPLICATION FONCTION
+        """
         global score
         if pType == 1 :
             point = 30
