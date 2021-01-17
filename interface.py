@@ -71,12 +71,15 @@ class Interface_game ():
         global list_shoot
         global score
         global speed
-
+        global dictionnaire_image
+        
         self.canevas.delete("all")
+        dictionnaire_image = {}
         current_game_id = 0
         game_id = 0
         score = 0
         speed = 8
+        self.create_background()
         self.score.set(str(score))
         list_shoot = []
         self.create_player_ship()
@@ -85,6 +88,17 @@ class Interface_game ():
         self.alien_shoot()
         self.deplacement_shoot()
         self.collision()
+        
+    def create_background(self):
+        """
+        fonction qui génère le fond du jeu
+        """
+        global dictionnaire_image
+
+        image_background = tkinter.PhotoImage(file = "background.gif")
+        dictionnaire_image["background.gif"] = image_background
+
+        self.canevas.create_image(0, 0, anchor="nw" ,image = image_background)
 
     def create_alien_ship(self):
         """
@@ -101,7 +115,19 @@ class Interface_game ():
         global position_x
         global position_y
         global coord_all_alien
-        dx = 40
+        global dictionnaire_image
+
+        image_alien1 = tkinter.PhotoImage(file = "alien1.gif")
+        dictionnaire_image["alien1.gif"] = image_alien1
+
+        image_alien2 = tkinter.PhotoImage(file = "alien2.gif")
+        dictionnaire_image["alien2.gif"] = image_alien2
+        
+        image_alien3 = tkinter.PhotoImage(file = "alien3.gif")
+        dictionnaire_image["alien3.gif"] = image_alien3
+
+        all_alien_image = [image_alien1, image_alien2, image_alien3]
+        dx = 1
         dy = 40
         coord_all_alien = [] 
         #On créé 5 vaisseaux à la suite sur une même ligne 3 fois
@@ -109,10 +135,10 @@ class Interface_game ():
         for ligne in range(3):
             coord_ligne_alien = [] #Liste vide qui sera remplie par les vaisseaux d'une même ligne
             for colonne in range(5):
-                alien_ship = lib.Vaisseau(1,20,1,[20+100*colonne,20+100*ligne])
+                alien_ship = lib.Vaisseau(ligne+1,20,1,[20+100*colonne,20+100*ligne])
                 position_x = alien_ship.get_position()[0]
                 position_y = alien_ship.get_position()[1]
-                alien_ship_gui = self.canevas.create_rectangle(position_x, position_y, position_x+50, position_y+50, fill = "blue")
+                alien_ship_gui = self.canevas.create_image(position_x, position_y, anchor = "center", image = all_alien_image[ligne])
                 coord_ligne_alien.append([alien_ship, alien_ship_gui])
             coord_all_alien.append(coord_ligne_alien)
         self.alien_movement() #Lance la fonction qui permet de déplacer continuellement les vaisseaux ennemis                                                 
@@ -159,14 +185,15 @@ class Interface_game ():
                         vaisseau[0].set_position([vaisseau[0].get_position()[0] + dx,vaisseau[0].get_position()[1]])
                         #Si le vaisseau est tjr affiché à l'écran, on met à jour sa position graphique
                         try : 
-                            self.canevas.coords(vaisseau[1],vaisseau[0].get_position()[0],vaisseau[0].get_position()[1],vaisseau[0].get_position()[0]+50,vaisseau[0].get_position()[1]+50)
+                            self.canevas.coords(vaisseau[1], vaisseau[0].get_position()[0], vaisseau[0].get_position()[1])
                         #S'il n'est plus affiché, on traite l'erreur qui indique qu'il ne trouve pas le "vaisseau_gui" en ne faisant rien 
                         #Le vaisseau n'est plus affiché <=> on a supprimé la variable vaisseau_gui de ce vaisseau
                         except IndexError: 
                             pass
             #Si les aliens n'ont pas encore atteint la ligne du vaisseau du joueur, on relance cette fonction
             if coord_all_alien[-1][0][0].get_position()[1] < 620 : 
-                self.mywindow.after(200,self.alien_movement)
+                #self.mywindow.after(200,self.alien_movement)
+                self.mywindow.after(5,self.alien_movement)
             #Si des aliens ont atteint la ligne du vaisseau joueur, on arrête la partie
             else : 
                 self.game_end()
@@ -214,10 +241,15 @@ class Interface_game ():
         """
         global my_ship
         global my_ship_gui
+        global dictionnaire_image
+
+        image_vaisseau = tkinter.PhotoImage(file = "vaisseau.gif")
+        dictionnaire_image["vaisseau.gif"] = image_vaisseau
+
         my_ship = lib.Vaisseau(0,20,3,[100,640])
         position_x = my_ship.get_position()[0]
         position_y = my_ship.get_position()[1]
-        my_ship_gui = self.canevas.create_rectangle(position_x , position_y , position_x+25 , position_y+25 , fill = 'white')
+        my_ship_gui = self.canevas.create_image(position_x , position_y , anchor = "center", image = image_vaisseau)
         self.vie.set(str(my_ship.get_vie()))
 
     def deplacement_joueur(self,pTouche):
@@ -236,7 +268,7 @@ class Interface_game ():
                 my_ship.deplacement_droite()
             position_x = my_ship.get_position()[0]
             position_y = my_ship.get_position()[1]
-            self.canevas.coords(my_ship_gui , position_x , position_y , position_x+25 , position_y+25)
+            self.canevas.coords(my_ship_gui , position_x , position_y)
 
     def create_ball(self, pPosition , pAuteur):
         """
@@ -277,9 +309,9 @@ class Interface_game ():
                     position_x = projectile.get_position()[0]
                     position_y = projectile.get_position()[1]
                 self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
-                if position_y == 0 or position_y == 700:
+                if position_y == 0 or position_y == 690:
                     self.canevas.delete(projectile_gui)
-            self.mywindow.after(200,self.deplacement_shoot)
+            self.mywindow.after(20,self.deplacement_shoot)
 
     def player_shoot(self):
         """
@@ -500,7 +532,11 @@ class Interface_game ():
         Chaque brique est représenté par un objet de la classe brique ainsi qu'un élement graphique appelé "brique_GUI"
         """
         global coord_all_wall
-        
+        global dictionnaire_image
+
+        image_brique = tkinter.PhotoImage(file = "brique.gif")
+        dictionnaire_image["brique.gif"] = image_brique
+
         coord_all_wall = []
         position_mur = [random.randint(200,275), random.randint(400,575), random.randint(700,775)]
         for pos in position_mur:
@@ -511,7 +547,7 @@ class Interface_game ():
                     brique = lib.brique([pos+25*colonne,475+25*ligne],6)
                     position_x = brique.get_position()[0]
                     position_y = brique.get_position()[1]
-                    brique_GUI = self.canevas.create_rectangle(position_x , position_y , position_x+25 , position_y+25 , fill = 'red')
+                    brique_GUI = self.canevas.create_image(position_x , position_y, anchor = "center", image = image_brique)
                     valren = [brique,brique_GUI]
                     lst_colonne_brique.append(valren)
                 mur.append(lst_colonne_brique)
