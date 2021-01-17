@@ -29,6 +29,9 @@ class Vaisseau() :
     def set_position (self,pPosition):
         self.__position = pPosition
 
+    def set_type (self,pType):
+        self.__type = pType
+
     def get_position(self):
         return self.__position[:]
 

@@ -5,8 +5,7 @@
 objectif : créer le jeu space invaders 
 Fait par Gouchon Léo et Delaplaine Romain
 Date de dernière modification : 17/01/2020
-To do : remplacer les rectangles par des images
-        faire une fonction qui fait réaparraitre des aliens quand il n'y en a plus
+To do : rien
 """
 
 #### les imports
@@ -88,7 +87,8 @@ class Interface_game ():
         self.alien_shoot()
         self.deplacement_shoot()
         self.collision()
-        
+        self.end_check()
+  
     def create_background(self):
         """
         fonction qui génère le fond du jeu
@@ -138,7 +138,7 @@ class Interface_game ():
                 alien_ship = lib.Vaisseau(ligne+1,20,1,[20+100*colonne,20+100*ligne])
                 position_x = alien_ship.get_position()[0]
                 position_y = alien_ship.get_position()[1]
-                alien_ship_gui = self.canevas.create_image(position_x, position_y, anchor = "center", image = all_alien_image[ligne])
+                alien_ship_gui = self.canevas.create_image(position_x, position_y, anchor = "nw", image = all_alien_image[ligne])
                 coord_ligne_alien.append([alien_ship, alien_ship_gui])
             coord_all_alien.append(coord_ligne_alien)
         self.alien_movement() #Lance la fonction qui permet de déplacer continuellement les vaisseaux ennemis                                                 
@@ -249,7 +249,7 @@ class Interface_game ():
         my_ship = lib.Vaisseau(0,20,3,[100,640])
         position_x = my_ship.get_position()[0]
         position_y = my_ship.get_position()[1]
-        my_ship_gui = self.canevas.create_image(position_x , position_y , anchor = "center", image = image_vaisseau)
+        my_ship_gui = self.canevas.create_image(position_x , position_y , anchor = "nw", image = image_vaisseau)
         self.vie.set(str(my_ship.get_vie()))
 
     def deplacement_joueur(self,pTouche):
@@ -285,7 +285,7 @@ class Interface_game ():
         position_y_ball = ball.get_position()[1]
         if pAuteur == 0:
             ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'blue')
-        elif pAuteur == 1:
+        elif pAuteur == 1 :
             ball_gui = self.canevas.create_oval(position_x_ball , position_y_ball , position_x_ball+10 , position_y_ball+10, fill = 'red')
         list_shoot.append([ball,ball_gui]) 
 
@@ -309,7 +309,7 @@ class Interface_game ():
                     position_x = projectile.get_position()[0]
                     position_y = projectile.get_position()[1]
                 self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
-                if position_y == 0 or position_y == 690:
+                if position_y == 5 or position_y == 690:
                     self.canevas.delete(projectile_gui)
             self.mywindow.after(20,self.deplacement_shoot)
 
@@ -350,10 +350,13 @@ class Interface_game ():
                     num1 = random.randint(0,4)
                     if len(coord_all_alien[2][num1]) == 2 : #Si le vaisseau qui est censé tiré est tjr affiché
                         alien_tireur  = coord_all_alien[2][num1][0]
+                        coord_all_alien[2][num1][0].set_type(1)
                     elif len(coord_all_alien[1][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
                         alien_tireur  = coord_all_alien[1][num1][0]
+                        coord_all_alien[1][num1][0].set_type(1)
                     elif len(coord_all_alien[0][num1]) == 2 : #Sinon on fait tirer le vaisseau du dessus
                         alien_tireur  = coord_all_alien[0][num1][0]
+                        coord_all_alien[0][num1][0].set_type(1)
                     #Si un des if ou elif a fonctionné, le try marchera
                     try :
                         position_tireur = alien_tireur.get_position()
@@ -521,6 +524,25 @@ class Interface_game ():
                                             list_shoot.remove(val1)          
                 self.mywindow.after(100,self.collision)
 
+    def end_check(self):
+        """
+        Fonction qui vérifie s'il reste des aliens et qui en fait apparaitre de nouveau s'il n'en reste plus 
+        """
+        global coord_all_alien
+        global game_id
+        global current_game_id
+        if game_id == current_game_id :
+
+            valren = 0
+            for ligne in coord_all_alien:
+                for vaisseau in ligne:
+                    if len(vaisseau) == 1 :
+                        valren += 1
+            if valren == 15 :
+                self.create_alien_ship()
+
+            self.mywindow.after(100,self.end_check)
+
     def create_wall(self):
         """
         Fonction qui créé 3 murs de brique (3 briques de hauteurs et 5 de largeurs)
@@ -547,7 +569,7 @@ class Interface_game ():
                     brique = lib.brique([pos+25*colonne,475+25*ligne],6)
                     position_x = brique.get_position()[0]
                     position_y = brique.get_position()[1]
-                    brique_GUI = self.canevas.create_image(position_x , position_y, anchor = "center", image = image_brique)
+                    brique_GUI = self.canevas.create_image(position_x , position_y, anchor = "nw", image = image_brique)
                     valren = [brique,brique_GUI]
                     lst_colonne_brique.append(valren)
                 mur.append(lst_colonne_brique)
