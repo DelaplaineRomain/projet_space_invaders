@@ -71,11 +71,11 @@ class shoot():
 
     def deplacement_bas_shoot(self):
         if self.__position_ball[1] <= 690 :
-            self.__position_ball[1] += 10
+            self.__position_ball[1] += 1
 
     def deplacement_haut_shoot(self):
         if self.__position_ball[1] >= 10 :
-            self.__position_ball[1] -= 10
+            self.__position_ball[1] -= 1
 
 class brique():
     def __init__(self,pPosition,pType):
