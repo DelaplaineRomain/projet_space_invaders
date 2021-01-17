@@ -58,7 +58,7 @@ class Vaisseau() :
             self.__position[1] -= 10
 
 class shoot():
-    def __init__(self,pPosition,pAuteur,pType):
+    def __init__(self,pPosition,pAuteur,pType):     # Un shoot auras toujours le type 5
         self.__position_ball = pPosition
         self.__auteur = pAuteur
         self.__type = pType
@@ -81,7 +81,7 @@ class shoot():
             self.__position_ball[1] -= 3
 
 class brique():
-    def __init__(self,pPosition,pType):
+    def __init__(self,pPosition,pType):             # Une brique auras toujours le type 6
         self.__position = pPosition
         self.__type = pType
     
