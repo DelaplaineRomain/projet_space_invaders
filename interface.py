@@ -4,9 +4,9 @@
 """
 objectif : créer le jeu space invaders 
 Fait par Gouchon Léo et Delaplaine Romain
-Date de dernière modification : 16/01/2020
-To do : commenter le reste du code
-        remplacer les rectangles par des images
+Date de dernière modification : 17/01/2020
+To do : remplacer les rectangles par des images
+        faire une fonction qui fait réaparraitre des aliens quand il n'y en a plus
 """
 
 #### les imports
