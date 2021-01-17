@@ -53,8 +53,10 @@ class Interface_game ():
         self.frame3.grid(row = 1 , column = 21 , rowspan = 16 , columnspan = 5 , padx = 10 , pady = 10)
         self.bouton_lancer = tkinter.Button(self.frame3 , text = 'Start' , command = self.game_start)
         self.bouton_lancer.grid(row = 1 , column = 1, padx = 10 , pady = 10)
-        self.bouton_quitter = tkinter.Button(self.frame3 , text = 'Stop' , command = self.fonction_stop)
-        self.bouton_quitter.grid(row = 2 , column = 1, padx = 10 , pady = 10)
+        self.bouton_stop = tkinter.Button(self.frame3 , text = 'Stop' , command = self.fonction_stop)
+        self.bouton_stop.grid(row = 2 , column = 1, padx = 10 , pady = 10)
+        self.bouton_quitter = tkinter.Button(self.frame3 , text = 'Exit' , command = self.mywindow.destroy)
+        self.bouton_quitter.grid(row = 3 , column = 1, padx = 10 , pady = 10)
 
         """lancement de la fenetre"""
 
@@ -309,7 +311,7 @@ class Interface_game ():
                     position_x = projectile.get_position()[0]
                     position_y = projectile.get_position()[1]
                 self.canevas.coords(projectile_gui , position_x , position_y , position_x+10 , position_y+10)
-                if position_y == 5 or position_y == 690:
+                if position_y <= 10 or position_y >= 690:
                     self.canevas.delete(projectile_gui)
             self.mywindow.after(20,self.deplacement_shoot)
 
