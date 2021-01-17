@@ -6,7 +6,6 @@ objectif : créer le jeu space invaders
 Fait par Gouchon Léo et Delaplaine Romain
 Date de dernière modification : 17/01/2020
 To do : remplacer les rectangles par des images
-        faire une fonction qui fait réaparraitre des aliens quand il n'y en a plus
 """
 
 #### les imports
@@ -85,6 +84,7 @@ class Interface_game ():
         self.alien_shoot()
         self.deplacement_shoot()
         self.collision()
+        self.end_check()
 
     def create_alien_ship(self):
         """
@@ -488,6 +488,25 @@ class Interface_game ():
                                         if val1 in list_shoot:
                                             list_shoot.remove(val1)          
                 self.mywindow.after(100,self.collision)
+
+    def end_check(self):
+        """
+        Fonction qui vérifie s'il reste des aliens et qui en fait apparaitre de nouveau s'il n'en reste plus 
+        """
+        global coord_all_alien
+        global game_id
+        global current_game_id
+        if game_id == current_game_id :
+
+            valren = 0
+            for ligne in coord_all_alien:
+                for vaisseau in ligne:
+                    if len(vaisseau) == 1 :
+                        valren += 1
+            if valren == 15 :
+                self.create_alien_ship()
+
+            self.mywindow.after(100,self.end_check)
 
     def create_wall(self):
         """
