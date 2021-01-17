@@ -4,7 +4,7 @@
 """
 objectif : créer le jeu space invaders 
 Fait par Gouchon Léo et Delaplaine Romain
-Date de dernière modification : 17/01/2020
+Date de dernière modification : 17/01/2021
 To do : rien
 """
 

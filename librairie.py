@@ -4,8 +4,8 @@
 """
 objectif : librairie pour le jeu space invaders
 Fait par Gouchon Léo et Delaplaine Romain
-Date de dernière modification : 18/12/2020
-To do : tout
+Date de dernière modification : 17/01/2021
+To do : rien
 """
 
 # creation de la classe vaisseau
