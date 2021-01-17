@@ -4,7 +4,17 @@ jeu space invaders
 # Objectif: 
 recréer le jeu space invaders
 
-# Première piste de travail (ce dont on aura besoin) :
+# Fonctionnement du jeu :
+
+Le programme à éxécuter est main.py
+
+Lorsque la fenêtre s'ouvre, on peut lancer une partie en appuyant sur 'Start' , on peut arrêter la partie en appuyant sur 'Stop' et ainsi relancer une partie. Le bouton 'Exit' fermera la fenêtre.
+
+# lien git :
+
+https://github.com/DelaplaineRomain/projet_space_invaders.git
+
+# Première piste de travail (ce dont on aura besoin, à affiner par la suite) :
 
 -programer en orienté objet
     -classe vaisseau   
@@ -17,11 +27,16 @@ recréer le jeu space invaders
             attribut d'alien
             -sous classe type d'alien
                 type d'alien
-                vie
             
     -classe ilot
         position
         vie
+
+    -classe balle
+        position initial
+        auteur
+
+-fonction qui créer la grille de jeu
 
 -fonction qui gère le deplacement du joueur (droite, gauche)
 
