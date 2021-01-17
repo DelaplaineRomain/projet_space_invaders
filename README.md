@@ -10,6 +10,10 @@ Le programme à éxécuter est main.py
 
 Lorsque la fenêtre s'ouvre, on peut lancer une partie en appuyant sur 'Start' , on peut arrêter la partie en appuyant sur 'Stop' et ainsi relancer une partie. Le bouton 'Exit' fermera la fenêtre.
 
+# lien git :
+
+https://github.com/DelaplaineRomain/projet_space_invaders.git
+
 # Première piste de travail (ce dont on aura besoin, à affiner par la suite) :
 
 -programer en orienté objet
